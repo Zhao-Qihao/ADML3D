@@ -31,7 +31,7 @@ model = dict(
         init_cfg=dict(
             type='Pretrained',
             checkpoint=  # noqa: E251
-            'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_tiny_patch4_window7_224.pth'  # noqa: E501
+            "/home/zqh/project/autoware-ml/work_dirs/mmdet3d_official/swint-nuimages-pretrained.pth"  # noqa: E501
         )),
     img_neck=dict(
         type='GeneralizedLSSFPN',
@@ -211,7 +211,7 @@ param_scheduler = [
 ]
 
 # runtime settings
-train_cfg = dict(by_epoch=True, max_epochs=6, val_interval=1)
+train_cfg = dict(by_epoch=True, max_epochs=20, val_interval=5)
 val_cfg = dict()
 test_cfg = dict()
 
@@ -227,6 +227,7 @@ optim_wrapper = dict(
 auto_scale_lr = dict(enable=False, base_batch_size=32)
 
 default_hooks = dict(
-    logger=dict(type='LoggerHook', interval=50),
-    checkpoint=dict(type='CheckpointHook', interval=1))
+    logger=dict(type='LoggerHook', interval=10),
+    checkpoint=dict(type='CheckpointHook', interval=20))
 del _base_.custom_hooks
+load_from = '/home/zqh/project/mmdetection3d/work_dirs/lidar_custom/epoch_20.pth'

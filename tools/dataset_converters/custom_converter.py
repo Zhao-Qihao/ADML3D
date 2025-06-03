@@ -2,6 +2,7 @@ import os
 from os import path as osp
 import mmengine
 import numpy as np
+import json
 class_names = ['car',
         'truck',
         'bus',
@@ -51,12 +52,12 @@ def _fill_trainval_infos(root_path):
             ann = ann.strip('\n')
             val_dict.add(ann)
 
-    totalPoints = os.listdir(root_path + '/points')
+    totalPoints = os.listdir(root_path + '/lidar_point_cloud_1')
     for i in range(len(totalPoints)):
         
         file_name = totalPoints[i][:-4]
         print(file_name)
-        lidar_path = root_path + '/points/' + file_name + '.bin'
+        lidar_path = root_path + '/lidar_point_cloud_1/' + file_name + '.bin'
         # img_path = root_path + '/images/' + file_name + '.jpg'
         label_path = root_path + '/labels/' + file_name + '.txt'
         
@@ -64,9 +65,6 @@ def _fill_trainval_infos(root_path):
         # mmengine.check_file_exist(img_path)
         mmengine.check_file_exist(label_path)
         
-        # time_stamp_list = file_name.split('_')
-        # time_stamp = int(time_stamp_list[0][-4:]) + int(time_stamp_list[1]) / (10 * len(time_stamp_list[1]))
-        # print(time_stamp)
         info = {
             'sample_idx': i % len(train_dict),
             # 'timestamp': timestamp,
@@ -79,7 +77,7 @@ def _fill_trainval_infos(root_path):
         
         # lidar_points 相关参数
         info['lidar_points']['lidar_path'] = file_name + '.bin'
-        info['lidar_points']['num_pts_feats'] = 4
+        info['lidar_points']['num_pts_feats'] = 3
         info['lidar_points']['lidar2ego'] = np.array([
                                                     [1, 0, 0, 0],
                                                     [0, 1, 0, 0],
@@ -93,7 +91,6 @@ def _fill_trainval_infos(root_path):
             '1',
             '2',
             '3',
-            '4',
         ]
 
 
@@ -105,28 +102,26 @@ def _fill_trainval_infos(root_path):
 
             # info['images']["CAM_"+cam_name]['img_path'] = root_path + '/images    /image_' + cam_name + '/' + cam_path
             info['images']["CAM_"+cam_name]['img_path'] = cam_path
-            info['images']["CAM_"+cam_name]['height'] = 1080
+            info['images']["CAM_"+cam_name]['height'] = 1536
             info['images']["CAM_"+cam_name]['width'] = 1920
             # 加载标定文件并解析 P0 参数
-            calib_file_path = osp.join(root_path, 'calibs', file_name + '.txt')
+            calib_file_path = osp.join(root_path, 'camera_config', file_name + '.json')
             with open(calib_file_path, 'r') as f:
-                calib_data = f.readlines()
+                calib_data = json.load(f)
             # 提取 P 参数
-            P_line = [line for line in calib_data if line.startswith('P'+cam_name+':')][0]
-            P_values = list(map(float, P_line.split()[1:]))
+            P_values = calib_data[int(cam_name)]['camera_internal']
             info['images']["CAM_"+cam_name]['cam2img'] = np.array([
-                                                            [P_values[0], P_values[1], P_values[2]],
-                                                            [P_values[4], P_values[5], P_values[6]],
-                                                            [P_values[8], P_values[9], P_values[10]],  # 这里后续由不同的数据集修改
+                                                            [P_values['fx'],            0.0, P_values['cx']],
+                                                            [           0.0, P_values['fy'], P_values['cy']],
+                                                            [           0.0,            0.0,            1.0],
                                                         ])
             # 提取外参
-            RT_line = [line for line in calib_data if line.startswith('lidar2cam'+cam_name+':')][0]
-            RT_values = list(map(float, RT_line.split()[1:]))
+            RT_values = calib_data[int(cam_name)]['camera_external']
             info['images']["CAM_"+cam_name]['lidar2cam'] = np.array([
                                                             [RT_values[0], RT_values[1], RT_values[2], RT_values[3]],
                                                             [RT_values[4], RT_values[5], RT_values[6], RT_values[7]],
                                                             [RT_values[8], RT_values[9], RT_values[10], RT_values[11]],
-                                                            [0, 0, 0, 1]  # 最后一行补充为 [0, 0, 0, 1], 4*4矩阵
+                                                            [RT_values[12], RT_values[13], RT_values[14], RT_values[15]]
                                                         ])
             
             # print(info['images']["CAM_"+cam_name])
@@ -158,6 +153,6 @@ def _fill_trainval_infos(root_path):
     return train_infos, val_infos
 
 if __name__ == '__main__':
-    train_infos, val_infos = _fill_trainval_infos('/data/datasets/custom_dataset')
+    train_infos, val_infos = _fill_trainval_infos('data/custom')
     print(len(train_infos))
     print(len(val_infos))

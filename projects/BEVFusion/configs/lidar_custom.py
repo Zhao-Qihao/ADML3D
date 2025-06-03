@@ -14,18 +14,21 @@ point_cloud_range = [-54.0, -54.0, -5.0, 54.0, 54.0, 3.0]
 class_names = [
     'car', 'truck', 'bus', 'bicycle', 'pedestrian', 'traffic_cone', 'barrier'
 ]
-point_load_dim = 6  # change to your point cloud feat dimension
-point_use_dim = 5
+# class_names = [
+#     'car', 'truck', 'bus', 'bicycle', 'pedestrian'
+# ]
+num_classes = len(class_names)
+point_load_dim = 3  #NOTE(Itachi): change to your point cloud feat dimension
+point_use_dim = [0, 1, 2]  #NOTE(Itachi): change to your point cloud feat dimension
 
 metainfo = dict(classes=class_names)
 dataset_type = 'CustomDataset'
-data_root = 'data/custom/'
-data_prefix = dict(pts='points', 
-                   CAM_0='images/image_0',
-                   CAM_1='images/image_1', 
-                   CAM_2='images/image_2',
-                   CAM_3='images/image_3',
-                   CAM_4='images/image_4',
+data_root = 'data/samples/'
+data_prefix = dict(pts='lidar_point_cloud_1', 
+                   CAM_0='camera_image_0',
+                   CAM_1='camera_image_1', 
+                   CAM_2='camera_image_2',
+                   CAM_3='camera_image_3',
                    sweeps='')
 input_modality = dict(use_lidar=True, use_camera=False)
 # backend_args = dict(
@@ -53,10 +56,10 @@ model = dict(
             voxel_size=[0.075, 0.075, 0.2],
             max_voxels=[120000, 160000],
             voxelize_reduce=True)),
-    pts_voxel_encoder=dict(type='HardSimpleVFE', num_features=5),
+    pts_voxel_encoder=dict(type='HardSimpleVFE', num_features=3),   #NOTE(Itachi): change to your point cloud feat dimension
     pts_middle_encoder=dict(
         type='BEVFusionSparseEncoder',
-        in_channels=5,
+        in_channels=3,   #NOTE(Itachi): change to your point cloud feat dimension
         sparse_shape=[1440, 1440, 41],
         order=('conv', 'norm', 'act'),
         norm_cfg=dict(type='BN1d', eps=0.001, momentum=0.01),
@@ -86,7 +89,7 @@ model = dict(
         auxiliary=True,
         in_channels=512,
         hidden_channel=128,
-        num_classes=7,
+        num_classes=num_classes,
         nms_kernel_size=3,
         bn_momentum=0.1,
         num_decoder_layers=1,
@@ -112,7 +115,7 @@ model = dict(
             gaussian_overlap=0.1,
             min_radius=2,
             pos_weight=-1,
-            code_weights=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0],
+            code_weights=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0],  # NOTE(Itachi): not use vx, vy
             assigner=dict(
                 type='HungarianAssigner3D',
                 iou_calculator=dict(type='BboxOverlaps3D', coordinate='lidar'),
@@ -377,6 +380,7 @@ auto_scale_lr = dict(enable=False, base_batch_size=32)
 log_processor = dict(window_size=50)
 
 default_hooks = dict(
-    logger=dict(type='LoggerHook', interval=50),
-    checkpoint=dict(type='CheckpointHook', interval=5))
+    logger=dict(type='LoggerHook', interval=10),
+    checkpoint=dict(type='CheckpointHook', interval=20))
 custom_hooks = [dict(type='DisableObjectSampleHook', disable_after_epoch=15)]
+load_from  = '/home/zqh/project/autoware-ml/work_dirs/mmdet3d_official/bevfusion_lidar_voxel0075_second_secfpn_8xb4-cyclic-20e_nus-3d-2628f933.pth'
