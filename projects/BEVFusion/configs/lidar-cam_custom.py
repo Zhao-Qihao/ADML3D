@@ -4,6 +4,7 @@ _base_ = [
 point_cloud_range = [-54.0, -54.0, -5.0, 54.0, 54.0, 3.0]
 input_modality = dict(use_lidar=True, use_camera=True)
 backend_args = None
+image_size = [384, 704]
 
 model = dict(
     type='BEVFusion',
@@ -46,8 +47,8 @@ model = dict(
         type='DepthLSSTransform',
         in_channels=256,
         out_channels=80,
-        image_size=[256, 704],
-        feature_size=[32, 88],
+        image_size=image_size,
+        feature_size=[48, 88],       # NOTE(Itachi): If you change the iamge size, you also need to change this
         xbound=[-54.0, 54.0, 0.3],
         ybound=[-54.0, 54.0, 0.3],
         zbound=[-10.0, 10.0, 20.0],
@@ -83,7 +84,7 @@ train_pipeline = [
         with_attr_label=False),
     dict(
         type='ImageAug3D',
-        final_dim=[256, 704],
+        final_dim=image_size,
         resize_lim=[0.38, 0.55],
         bot_pct_lim=[0.0, 0.0],
         rot_lim=[-5.4, 5.4],
@@ -150,7 +151,7 @@ test_pipeline = [
     #     backend_args=backend_args),
     dict(
         type='ImageAug3D',
-        final_dim=[256, 704],
+        final_dim=image_size,
         resize_lim=[0.48, 0.48],
         bot_pct_lim=[0.0, 0.0],
         rot_lim=[0.0, 0.0],
@@ -227,7 +228,9 @@ optim_wrapper = dict(
 auto_scale_lr = dict(enable=False, base_batch_size=32)
 
 default_hooks = dict(
-    logger=dict(type='LoggerHook', interval=10),
-    checkpoint=dict(type='CheckpointHook', interval=20))
+    logger=dict(type='LoggerHook', interval=50),
+    checkpoint=dict(type='CheckpointHook', interval=5))
 del _base_.custom_hooks
-load_from = '/home/zqh/project/mmdetection3d/work_dirs/lidar_custom/epoch_20.pth'
+work_dir = './work_dirs/lidar_custom'
+# load_from = '/home/zqh/project/mmdetection3d/work_dirs/lidar_custom/epoch_20.pth'
+load_from = '/home/zqh/project/autoware-ml/work_dirs/nus_lidar_cam_4dim_load_from_lyft_epoch_2_7class_nodepth_loss/epoch_3.pth'

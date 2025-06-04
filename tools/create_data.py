@@ -7,7 +7,7 @@ from mmengine import print_log
 from tools.dataset_converters import indoor_converter as indoor
 from tools.dataset_converters import kitti_converter as kitti
 from tools.dataset_converters import lyft_converter as lyft_converter
-from tools.dataset_converters import custom_converter as custom_converter
+from tools.dataset_converters import custom_scene_converter as custom_converter
 from tools.dataset_converters import nuscenes_converter as nuscenes_converter
 from tools.dataset_converters import semantickitti_converter
 from tools.dataset_converters.create_gt_database import (

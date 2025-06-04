@@ -18,31 +18,20 @@ class_names = [
 #     'car', 'truck', 'bus', 'bicycle', 'pedestrian'
 # ]
 num_classes = len(class_names)
-point_load_dim = 3  #NOTE(Itachi): change to your point cloud feat dimension
-point_use_dim = [0, 1, 2]  #NOTE(Itachi): change to your point cloud feat dimension
+point_load_dim = 3  # NOTE(Itachi): change to your point cloud feat dimension
+point_use_dim = [0, 1, 2]  # NOTE(Itachi): change to your point cloud use dimension
+num_proposals = 500
 
 metainfo = dict(classes=class_names)
 dataset_type = 'CustomDataset'
-data_root = 'data/samples/'
-data_prefix = dict(pts='lidar_point_cloud_1', 
-                   CAM_0='camera_image_0',
-                   CAM_1='camera_image_1', 
-                   CAM_2='camera_image_2',
-                   CAM_3='camera_image_3',
+data_root = 'data/xbzl_data/'
+data_prefix = dict(pts='', 
+                   CAM_0='',
+                   CAM_1='', 
+                   CAM_2='',
+                   CAM_3='',
                    sweeps='')
 input_modality = dict(use_lidar=True, use_camera=False)
-# backend_args = dict(
-#     backend='petrel',
-#     path_mapping=dict({
-#         './data/nuscenes/':
-#         's3://openmmlab/datasets/detection3d/nuscenes/',
-#         'data/nuscenes/':
-#         's3://openmmlab/datasets/detection3d/nuscenes/',
-#         './data/nuscenes_mini/':
-#         's3://openmmlab/datasets/detection3d/nuscenes/',
-#         'data/nuscenes_mini/':
-#         's3://openmmlab/datasets/detection3d/nuscenes/'
-#     }))
 backend_args = None
 
 model = dict(
@@ -59,7 +48,7 @@ model = dict(
     pts_voxel_encoder=dict(type='HardSimpleVFE', num_features=3),   #NOTE(Itachi): change to your point cloud feat dimension
     pts_middle_encoder=dict(
         type='BEVFusionSparseEncoder',
-        in_channels=3,   #NOTE(Itachi): change to your point cloud feat dimension
+        in_channels=3,   # NOTE(Itachi): change to your point cloud feat dimension
         sparse_shape=[1440, 1440, 41],
         order=('conv', 'norm', 'act'),
         norm_cfg=dict(type='BN1d', eps=0.001, momentum=0.01),
@@ -84,8 +73,8 @@ model = dict(
         upsample_cfg=dict(type='deconv', bias=False),
         use_conv_for_no_stride=True),
     bbox_head=dict(
-        type='TransFusionHead',
-        num_proposals=200,
+        type='BEVFusionHead',
+        num_proposals=num_proposals,
         auxiliary=True,
         in_channels=512,
         hidden_channel=128,
@@ -155,41 +144,6 @@ model = dict(
         loss_bbox=dict(
             type='mmdet.L1Loss', reduction='mean', loss_weight=0.25)))
 
-# db_sampler = dict(
-#     data_root=data_root,
-#     info_path=data_root + 'nuscenes_dbinfos_train.pkl',
-#     rate=1.0,
-#     prepare=dict(
-#         filter_by_difficulty=[-1],
-#         filter_by_min_points=dict(
-#             car=5,
-#             truck=5,
-#             bus=5,
-#             trailer=5,
-#             construction_vehicle=5,
-#             traffic_cone=5,
-#             barrier=5,
-#             motorcycle=5,
-#             bicycle=5,
-#             pedestrian=5)),
-#     classes=class_names,
-#     sample_groups=dict(
-#         car=2,
-#         truck=3,
-#         construction_vehicle=7,
-#         bus=4,
-#         trailer=6,
-#         barrier=2,
-#         motorcycle=6,
-#         bicycle=6,
-#         pedestrian=2,
-#         traffic_cone=2),
-#     points_loader=dict(
-#         type='LoadPointsFromFile',
-#         coord_type='LIDAR',
-#         load_dim=5,
-#         use_dim=[0, 1, 2, 3, 4],
-#         backend_args=backend_args))
 
 train_pipeline = [
     dict(
@@ -268,7 +222,7 @@ test_pipeline = [
 ]
 
 train_dataloader = dict(
-    batch_size=4,
+    batch_size=3,
     num_workers=4,
     persistent_workers=True,
     sampler=dict(type='DefaultSampler', shuffle=True),
