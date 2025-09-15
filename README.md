@@ -48,10 +48,12 @@ python tools/create_data.py custom --root-path ./data/custom --out-dir ./data/cu
 notice that there are 7class in my custom dataset, ['car','truck','bus','bicycle','pedestrian','traffic_cone','barrier'], you can change the class name in `mmdet3d/datasets/custom_dataset.py` to fit your dataset.
 
 ## Training
+
 before training, you should compiling operations on CUDA
 ```
 python projects/BEVFusion/setup.py develop
 ```
+
 for lidar only training
 ```python
 bash tools/dist_train.sh projects/BEVFusion/configs/lidar_custom.py 4
@@ -61,6 +63,7 @@ for lidar-cam training
 bash tools/dist_train.sh projects/BEVFusion/configs/lidar-cam_custom.py 4
 ```
 notice that you should change the `data_prefix` and `point_load_dim` in `projects/BEVFusion/configs/lidar_custom.py` to your own. 
+
 
 ## Deploy
 To export an ONNX, use the following command:
@@ -78,3 +81,4 @@ python projects/BEVFusion/deploy/export.py \
   --device cuda:0 \
   --work-dir ${WORK_DIR}
 ```
+
