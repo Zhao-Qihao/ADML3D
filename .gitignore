@@ -109,7 +109,7 @@ venv.bak/
 data
 .vscode
 .idea
-
+outputs
 # custom
 *.pkl
 *.pkl.json

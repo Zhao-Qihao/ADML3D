@@ -7,6 +7,7 @@ from mmengine import print_log
 from tools.dataset_converters import indoor_converter as indoor
 from tools.dataset_converters import kitti_converter as kitti
 from tools.dataset_converters import lyft_converter as lyft_converter
+from tools.dataset_converters import custom_scene_converter as custom_converter
 from tools.dataset_converters import nuscenes_converter as nuscenes_converter
 from tools.dataset_converters import semantickitti_converter
 from tools.dataset_converters.create_gt_database import (
@@ -52,6 +53,12 @@ def kitti_data_prep(root_path,
         mask_anno_path='instances_train.json',
         with_mask=(version == 'mask'))
 
+def custom_data_prep(root_path,
+                     info_prefix,
+                     version,
+                     datset_name,
+                     out_dir):
+    custom_converter.create_custom_dataset_infos(root_path, info_prefix)
 
 def nuscenes_data_prep(root_path,
                        info_prefix,
@@ -335,6 +342,11 @@ if __name__ == '__main__':
                 version=args.version,
                 out_dir=args.out_dir,
                 with_plane=args.with_plane)
+
+    elif args.dataset == 'custom':
+        custom_converter.create_custom_dataset_infos(
+            root_path=args.root_path, info_prefix=args.extra_tag)
+        
     elif args.dataset == 'nuscenes' and args.version != 'v1.0-mini':
         if args.only_gt_database:
             create_groundtruth_database('NuScenesDataset', args.root_path,

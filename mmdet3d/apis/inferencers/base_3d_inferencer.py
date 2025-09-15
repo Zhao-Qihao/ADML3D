@@ -319,12 +319,13 @@ class Base3DInferencer(BaseInferencer):
             result['pts_semantic_mask'] = \
                 pred_pts_seg.pts_semantic_mask.tolist()
 
-        if data_sample.box_mode_3d == Box3DMode.LIDAR:
-            result['box_type_3d'] = 'LiDAR'
-        elif data_sample.box_mode_3d == Box3DMode.CAM:
-            result['box_type_3d'] = 'Camera'
-        elif data_sample.box_mode_3d == Box3DMode.DEPTH:
-            result['box_type_3d'] = 'Depth'
+        # if data_sample.box_mode_3d == Box3DMode.LIDAR:    # NOTE(Itachi): For lidar model inference
+        #     result['box_type_3d'] = 'LiDAR'
+        # elif data_sample.box_mode_3d == Box3DMode.CAM:
+        #     result['box_type_3d'] = 'Camera'
+        # elif data_sample.box_mode_3d == Box3DMode.DEPTH:
+        #     result['box_type_3d'] = 'Depth'
+        result['box_type_3d'] = 'LiDAR'
 
         if pred_out_dir != '':
             if 'lidar_path' in data_sample:

@@ -4,17 +4,15 @@ from typing import Any, Dict
 import numpy as np
 import torch
 from mmcv.transforms import BaseTransform
-from PIL import Image
-
 from mmdet3d.datasets import GlobalRotScaleTrans
 from mmdet3d.registry import TRANSFORMS
+from PIL import Image
 
 
 @TRANSFORMS.register_module()
 class ImageAug3D(BaseTransform):
 
-    def __init__(self, final_dim, resize_lim, bot_pct_lim, rot_lim, rand_flip,
-                 is_train):
+    def __init__(self, final_dim, resize_lim, bot_pct_lim, rot_lim, rand_flip, is_train):
         self.final_dim = final_dim
         self.resize_lim = resize_lim
         self.bot_pct_lim = bot_pct_lim
@@ -22,15 +20,28 @@ class ImageAug3D(BaseTransform):
         self.rot_lim = rot_lim
         self.is_train = is_train
 
-    def sample_augmentation(self, results):
-        H, W = results['ori_shape']
+    def sample_augmentation(self, results, camera_index):
+        H, W = results["ori_shape"]
         fH, fW = self.final_dim
+        cam2image = results["cam2img"][camera_index]
+        fx = cam2image[0, 0]
+        fy = cam2image[1, 1]
+        cx = cam2image[0, 2]
+        cy = cam2image[1, 2]
+
+        r31, r32, r33 = results["cam2lidar"][camera_index, 2, :3]
+
+        yl = cy + cx * (fy / fx) * (r31 / r32) - fy * (r33 / r32)
+        yr = cy + (cx - W + 1) * (fy / fx) * (r31 / r32) - fy * (r33 / r32)
+        yh = max(0, min(yr, yl))
         if self.is_train:
             resize = np.random.uniform(*self.resize_lim)
             resize_dims = (int(W * resize), int(H * resize))
             newW, newH = resize_dims
-            crop_h = int(
-                (1 - np.random.uniform(*self.bot_pct_lim)) * newH) - fH
+            yh_resized = yh * resize
+            crop_h = int(min(newH - fH, yh_resized))
+            # crop_h = int(
+            #    (1 - np.random.uniform(*self.bot_pct_lim)) * newH) - fH
             crop_w = int(np.random.uniform(0, max(0, newW - fW)))
             crop = (crop_w, crop_h, crop_w + fW, crop_h + fH)
             flip = False
@@ -41,17 +52,18 @@ class ImageAug3D(BaseTransform):
             resize = np.mean(self.resize_lim)
             resize_dims = (int(W * resize), int(H * resize))
             newW, newH = resize_dims
-            crop_h = int((1 - np.mean(self.bot_pct_lim)) * newH) - fH
+            yh_resized = yh * resize
+            crop_h = int(min(newH - fH, yh_resized))
+            # crop_h = int((1 - np.mean(self.bot_pct_lim)) * newH) - fH
             crop_w = int(max(0, newW - fW) / 2)
             crop = (crop_w, crop_h, crop_w + fW, crop_h + fH)
             flip = False
             rotate = 0
         return resize, resize_dims, crop, flip, rotate
 
-    def img_transform(self, img, rotation, translation, resize, resize_dims,
-                      crop, flip, rotate):
+    def img_transform(self, img, rotation, translation, resize, resize_dims, crop, flip, rotate):
         # adjust image
-        img = Image.fromarray(img.astype('uint8'), mode='RGB')
+        img = Image.fromarray(img.astype("uint8"), mode="RGB")
         img = img.resize(resize_dims)
         img = img.crop(crop)
         if flip:
@@ -67,10 +79,12 @@ class ImageAug3D(BaseTransform):
             rotation = A.matmul(rotation)
             translation = A.matmul(translation) + b
         theta = rotate / 180 * np.pi
-        A = torch.Tensor([
-            [np.cos(theta), np.sin(theta)],
-            [-np.sin(theta), np.cos(theta)],
-        ])
+        A = torch.Tensor(
+            [
+                [np.cos(theta), np.sin(theta)],
+                [-np.sin(theta), np.cos(theta)],
+            ]
+        )
         b = torch.Tensor([crop[2] - crop[0], crop[3] - crop[1]]) / 2
         b = A.matmul(-b) + b
         rotation = A.matmul(rotation)
@@ -79,12 +93,11 @@ class ImageAug3D(BaseTransform):
         return img, rotation, translation
 
     def transform(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        imgs = data['img']
+        imgs = data["img"]
         new_imgs = []
         transforms = []
-        for img in imgs:
-            resize, resize_dims, crop, flip, rotate = self.sample_augmentation(
-                data)
+        for camera_index, img in enumerate(imgs):
+            resize, resize_dims, crop, flip, rotate = self.sample_augmentation(data, camera_index)
             post_rot = torch.eye(2)
             post_tran = torch.zeros(2)
             new_img, rotation, translation = self.img_transform(
@@ -102,9 +115,15 @@ class ImageAug3D(BaseTransform):
             transform[:2, 3] = translation
             new_imgs.append(np.array(new_img).astype(np.float32))
             transforms.append(transform.numpy())
-        data['img'] = new_imgs
+
+            # TODO(knzo25): keep this during the review to generate evidence. remove before merging
+            """ old_img = Image.open(data['img_path'][camera_index])
+            old_img.save(f'img_{camera_index}.png')
+            new_img.save(f'img_aug_{camera_index}.png') """
+
+        data["img"] = new_imgs
         # update the calibration matrices
-        data['img_aug_matrix'] = transforms
+        data["img_aug_matrix"] = transforms
         return data
 
 
@@ -120,26 +139,25 @@ class BEVFusionRandomFlip3D:
         rotation = np.eye(3)
         if flip_horizontal:
             rotation = np.array([[1, 0, 0], [0, -1, 0], [0, 0, 1]]) @ rotation
-            if 'points' in data:
-                data['points'].flip('horizontal')
-            if 'gt_bboxes_3d' in data:
-                data['gt_bboxes_3d'].flip('horizontal')
-            if 'gt_masks_bev' in data:
-                data['gt_masks_bev'] = data['gt_masks_bev'][:, :, ::-1].copy()
+            if "points" in data:
+                data["points"].flip("horizontal")
+            if "gt_bboxes_3d" in data:
+                data["gt_bboxes_3d"].flip("horizontal")
+            if "gt_masks_bev" in data:
+                data["gt_masks_bev"] = data["gt_masks_bev"][:, :, ::-1].copy()
 
         if flip_vertical:
             rotation = np.array([[-1, 0, 0], [0, 1, 0], [0, 0, 1]]) @ rotation
-            if 'points' in data:
-                data['points'].flip('vertical')
-            if 'gt_bboxes_3d' in data:
-                data['gt_bboxes_3d'].flip('vertical')
-            if 'gt_masks_bev' in data:
-                data['gt_masks_bev'] = data['gt_masks_bev'][:, ::-1, :].copy()
+            if "points" in data:
+                data["points"].flip("vertical")
+            if "gt_bboxes_3d" in data:
+                data["gt_bboxes_3d"].flip("vertical")
+            if "gt_masks_bev" in data:
+                data["gt_masks_bev"] = data["gt_masks_bev"][:, ::-1, :].copy()
 
-        if 'lidar_aug_matrix' not in data:
-            data['lidar_aug_matrix'] = np.eye(4)
-        data['lidar_aug_matrix'][:3, :] = rotation @ data[
-            'lidar_aug_matrix'][:3, :]
+        if "lidar_aug_matrix" not in data:
+            data["lidar_aug_matrix"] = np.eye(4)
+        data["lidar_aug_matrix"][:3, :] = rotation @ data["lidar_aug_matrix"][:3, :]
         return data
 
 
@@ -160,28 +178,25 @@ class BEVFusionGlobalRotScaleTrans(GlobalRotScaleTrans):
             'pcd_scale_factor', 'pcd_trans' and `gt_bboxes_3d` are updated
             in the result dict.
         """
-        if 'transformation_3d_flow' not in input_dict:
-            input_dict['transformation_3d_flow'] = []
+        if "transformation_3d_flow" not in input_dict:
+            input_dict["transformation_3d_flow"] = []
 
         self._rot_bbox_points(input_dict)
 
-        if 'pcd_scale_factor' not in input_dict:
+        if "pcd_scale_factor" not in input_dict:
             self._random_scale(input_dict)
         self._trans_bbox_points(input_dict)
         self._scale_bbox_points(input_dict)
 
-        input_dict['transformation_3d_flow'].extend(['R', 'T', 'S'])
+        input_dict["transformation_3d_flow"].extend(["R", "T", "S"])
 
         lidar_augs = np.eye(4)
-        lidar_augs[:3, :3] = input_dict['pcd_rotation'].T * input_dict[
-            'pcd_scale_factor']
-        lidar_augs[:3, 3] = input_dict['pcd_trans'] * \
-            input_dict['pcd_scale_factor']
+        lidar_augs[:3, :3] = input_dict["pcd_rotation"].T * input_dict["pcd_scale_factor"]
+        lidar_augs[:3, 3] = input_dict["pcd_trans"] * input_dict["pcd_scale_factor"]
 
-        if 'lidar_aug_matrix' not in input_dict:
-            input_dict['lidar_aug_matrix'] = np.eye(4)
-        input_dict[
-            'lidar_aug_matrix'] = lidar_augs @ input_dict['lidar_aug_matrix']
+        if "lidar_aug_matrix" not in input_dict:
+            input_dict["lidar_aug_matrix"] = np.eye(4)
+        input_dict["lidar_aug_matrix"] = lidar_augs @ input_dict["lidar_aug_matrix"]
 
         return input_dict
 
@@ -224,7 +239,7 @@ class GridMask(BaseTransform):
     def transform(self, results):
         if np.random.rand() > self.prob:
             return results
-        imgs = results['img']
+        imgs = results["img"]
         h = imgs[0].shape[0]
         w = imgs[0].shape[1]
         self.d1 = 2
@@ -254,8 +269,7 @@ class GridMask(BaseTransform):
         mask = Image.fromarray(np.uint8(mask))
         mask = mask.rotate(r)
         mask = np.asarray(mask)
-        mask = mask[(hh - h) // 2:(hh - h) // 2 + h,
-                    (ww - w) // 2:(ww - w) // 2 + w]
+        mask = mask[(hh - h) // 2 : (hh - h) // 2 + h, (ww - w) // 2 : (ww - w) // 2 + w]
 
         mask = mask.astype(np.float32)
         mask = mask[:, :, None]
