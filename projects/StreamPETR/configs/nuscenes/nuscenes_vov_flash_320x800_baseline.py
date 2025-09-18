@@ -44,9 +44,9 @@ class_names = [
 metainfo = dict(classes=class_names)
 
 num_gpus = 4
-batch_size = 4
+batch_size = 2
 test_batch_size = 1
-val_interval = 5
+val_interval =32
 num_epochs = 30
 num_cameras = 6
 backend_args = None
@@ -365,7 +365,7 @@ train_cfg = dict(
 val_cfg = dict()
 test_cfg = dict()
 
-lr = 4e-4
+lr = 2e-4
 optimizer = dict(type="AdamW", lr=lr, weight_decay=0.01)  # bs 8: 2e-4 || bs 16: 4e-4,
 
 optim_wrapper = dict(
@@ -411,4 +411,7 @@ env_cfg = dict(
     dist_cfg=dict(backend="nccl", timeout=3600),
 )  # Since we are doing inference with batch_size=1, it can be slow so timeout needs to be increased
 
-load_from = "./work_dirs/fcos3d_vovnet_imgbackbone-remapped.pth"
+# load_from = "./work_dirs/fcos3d_vovnet_imgbackbone-remapped.pth"
+
+work_dir = "./work_dirs/nuscenes_vov_flash_320x800_baseline"
+resume = True
