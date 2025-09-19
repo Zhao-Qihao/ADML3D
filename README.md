@@ -4,6 +4,12 @@ This repo show how to train BEVFusion on custom dataset. Include: creating a cus
 git clone https://github.com/Zhao-Qihao/mmdetection3d.git
 git checkout customdata
 ```
+use ```pip show nuscenes-devkit``` to find and comment the blow code
+```
+        assert set(self.pred_boxes.sample_tokens) == set(self.gt_boxes.sample_tokens), \
+            "Samples in split doesn't match samples in predictions."
+```
+
 ## Installation
 Refer to [installation](https://mmdetection3d.readthedocs.io/zh-cn/latest/get_started.html) to prepare the environment.
 ## Dataset Preparation
