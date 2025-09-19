@@ -359,7 +359,8 @@ test_evaluator = val_evaluator
 
 
 train_cfg = dict(
-    by_epoch=True, max_epochs=num_epochs, val_interval=val_interval, dynamic_intervals=[(num_epochs - 5, 1)]
+    by_epoch=True, max_epochs=num_epochs, val_interval=val_interval, 
+    # dynamic_intervals=[(num_epochs - 5, 1)]
 )
 # train_cfg = dict(type='IterBasedTrainLoop', max_iters=1000, val_interval=10)
 val_cfg = dict()
