@@ -1,9 +1,6 @@
 # StreamPETR
 ## Results and models
 
-- StreamPetr
-  - TODO
-## Get started
 ### 1. Setup
 
 - Run setup script
@@ -17,13 +14,13 @@ cd projects/StreamPETR && pip install -e .
 
 ```sh
 # Single GPU training
-python tools/detection3d/train.py projects/StreamPETR/configs/nuscenes/t4_base_vov_flash_480x640_baseline.py
+python tools/train.py projects/StreamPETR/configs/nuscenes/nuscenes_vov_flash_320x800_baseline.py
 ```
 
 ```sh
 # Multi GPU training
 
-bash tools/detection3d/dist_train.sh projects/StreamPETR/configs/nuscenes/t4_base_vov_flash_480x640_baseline.py 2
+bash tools/dist_train.sh projects/StreamPETR/configs/nuscenes/nuscenes_vov_flash_320x800_baseline.py 4
 ```
 
 ### 3. Evaluation
@@ -32,7 +29,7 @@ bash tools/detection3d/dist_train.sh projects/StreamPETR/configs/nuscenes/t4_bas
 
 ```sh
 # Evaluation for nuscenes
-python tools/detection3d/test.py projects/StreamPETR/configs/nuscenes/nuscenes_vov_flash_320x800_baseline.py work_dirs/nuscenes_vov_flash_320x800_baseline/epoch_35.pth
+python tools/test.py projects/StreamPETR/configs/nuscenes/nuscenes_vov_flash_320x800_baseline.py work_dirs/nuscenes_vov_flash_320x800_baseline/epoch_35.pth
 ```
 
 ### 4. Visualization
@@ -41,7 +38,7 @@ python tools/detection3d/test.py projects/StreamPETR/configs/nuscenes/nuscenes_v
 
 ```sh
 # Inference for nuscenes
-python tools/detection3d/visualize_bboxes_cameraonly.py projects/StreamPETR/configs/nuscenes/nuscenes_vov_flash_320x800_baseline.py.py work_dirs/nuscenes_vov_flash_320x800_baseline.py/epoch_35.pth
+python tools/visualize/visualize_bboxes_cameraonly.py projects/StreamPETR/configs/nuscenes/nuscenes_vov_flash_320x800_baseline.py.py work_dirs/nuscenes_vov_flash_320x800_baseline.py/epoch_35.pth
 ```
 ### 5. Deploy
 
