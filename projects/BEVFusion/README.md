@@ -24,8 +24,8 @@ python projects/BEVFusion/demo/multi_modality_demo.py demo/data/nuscenes/n015-20
 
 ### Training commands
 We support two dataset type, nuscenes dataset and custom dataset.
-Below is the training, testing, and exporting method on the nuScenes dataset. Custom datasets are similar. And your custom dataset format should refer to [xbzl_data
-](https://github.com/Zhao-Qihao/xbzl_data/tree/master).
+Below is the training, testing, and exporting method on the nuScenes dataset. Custom datasets are similar. Your custom dataset format should refer to [xbzl_data
+](https://github.com/Zhao-Qihao/xbzl_data/tree/master), and notice that you should change the `data_prefix` and `point_load_dim` in [lidar_custom.py](projects/BEVFusion/configs/lidar_custom.py) to your own. 
 1. You should train the lidar-only detector first:
 
 ```bash

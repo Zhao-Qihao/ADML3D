@@ -19,7 +19,3 @@ custom_imports = dict(
 ```
 
 An example is presented in [BEVFusion](../BEVFusion/README.md)
-
-# TensorRT inference
-
-An example of sparse convolution inference in TensorRT is presented in our BEVFusion [implementation](https://github.com/knzo25/bevfusion_ros2).

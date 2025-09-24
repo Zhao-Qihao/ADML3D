@@ -8,6 +8,11 @@
 ```sh
 cd projects/StreamPETR && pip install -e .
 ```
+use ```pip show nuscenes-devkit``` to find and comment the blow code
+```
+        assert set(self.pred_boxes.sample_tokens) == set(self.gt_boxes.sample_tokens), \
+            "Samples in split doesn't match samples in predictions."
+```
 ### 2. Train
 
 - Run training on nuscenes dataset with appropriate configs
