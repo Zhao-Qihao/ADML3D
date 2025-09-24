@@ -24,7 +24,8 @@ python projects/BEVFusion/demo/multi_modality_demo.py demo/data/nuscenes/n015-20
 
 ### Training commands
 We support two dataset type, nuscenes dataset and custom dataset.
-Below is the training, testing, and exporting method on the nuScenes dataset. Custom datasets are similar.
+Below is the training, testing, and exporting method on the nuScenes dataset. Custom datasets are similar. And your custom dataset format should refer to [xbzl_data
+](https://github.com/Zhao-Qihao/xbzl_data/tree/master).
 1. You should train the lidar-only detector first:
 
 ```bash
@@ -53,7 +54,7 @@ Sparse convolutions are not deployable by default. In the deployment we follow t
 
 Note: we only support traveller59's backend during deployment, but the model checkpoints can correspond to either backend.
 
-#### ONNX export
+#### ONNX Export
 
 
 To export an ONNX, use the following command:
