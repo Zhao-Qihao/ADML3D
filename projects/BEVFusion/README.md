@@ -6,12 +6,11 @@ We implement BEVFusion and support training and testing on NuScenes dataset and 
 
 <!-- For a typical model, this section should contain the commands for training and testing. You are also suggested to dump your environment specification to env.yml by `conda env export > env.yml`. -->
 
-### Compiling operations on CUDA
-
-**Note** that the voxelization OP in the original implementation of `BEVFusion` is different from the implementation in MMCV. If you want to use the original pretrained model [here](https://github.com/mit-han-lab/bevfusion/blob/main/README.md), you need to use the original implementation of voxelization OP.
+### Setup
 
 ```python
 python projects/BEVFusion/setup.py develop
+pip install spconv-cu120
 ```
 
 ### Demo
@@ -19,7 +18,7 @@ python projects/BEVFusion/setup.py develop
 Run a demo on NuScenes data using [BEVFusion model](https://drive.google.com/file/d/1QkvbYDk4G2d6SZoeJqish13qSyXA4lp3/view?usp=share_link):
 
 ```shell
-python projects/BEVFusion/demo/multi_modality_demo.py demo/data/nuscenes/n015-2018-07-24-11-22-45+0800__LIDAR_TOP__1532402927647951.pcd.bin demo/data/nuscenes/ demo/data/nuscenes/n015-2018-07-24-11-22-45+0800.pkl projects/BEVFusion/configs/bevfusion_lidar-cam_voxel0075_second_secfpn_8xb4-cyclic-20e_nus-3d.py ${CHECKPOINT_FILE} --cam-type all --score-thr 0.2 --show
+python tools/visualize/visualize_bev.py /home/zqh/project/mmdetection3d/projects/BEVFusion/configs/nuscenes/bevfusion_lidar-cam_voxel0075_second_secfpn_8xb4-cyclic-20e_nus-3d.py --checkpoint ${CHECKPOINT_FILE} 
 ```
 
 ### Training commands

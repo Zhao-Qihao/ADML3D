@@ -148,6 +148,7 @@ def main():
             ylim=[-60, 60],
             classes=cfg.class_names,
         )
+        break  # NOTE(Itachi): only visualize the first frame
 
 
 if __name__ == "__main__":
