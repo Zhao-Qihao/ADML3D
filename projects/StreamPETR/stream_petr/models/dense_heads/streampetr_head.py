@@ -293,6 +293,7 @@ class StreamPETRHead(AnchorFreeHead):
             grid_points = grid_points[: self.num_propagated]
 
             self.pseudo_reference_points = nn.Parameter(grid_points, requires_grad=False)
+            # self.pseudo_reference_points = nn.Embedding(self.num_propagated, 3)
         self.query_embedding = nn.Sequential(
             nn.Linear(self.embed_dims * 3 // 2, self.embed_dims),
             nn.ReLU(),
@@ -315,6 +316,9 @@ class StreamPETRHead(AnchorFreeHead):
         # if self.num_propagated > 0:
         #     nn.init.uniform_(self.pseudo_reference_points, 0, 1)
         #     self.pseudo_reference_points.requires_grad = False
+        # if self.num_propagated > 0:
+        #     nn.init.uniform_(self.pseudo_reference_points.weight.data, 0, 1)
+        #     self.pseudo_reference_points.weight.requires_grad = False
 
         self.transformer.init_weights()
         if self.loss_cls.use_sigmoid:
@@ -372,6 +376,9 @@ class StreamPETRHead(AnchorFreeHead):
             pseudo_reference_points = (
                 self.pseudo_reference_points * (self.pc_range[3:6] - self.pc_range[0:3]) + self.pc_range[0:3]
             )
+            # pseudo_reference_points = (
+            #     self.pseudo_reference_points.weight * (self.pc_range[3:6] - self.pc_range[0:3]) + self.pc_range[0:3]
+            # )
             self.memory_reference_point[:, : self.num_propagated] = (
                 self.memory_reference_point[:, : self.num_propagated] + (1 - x).view(B, 1, 1) * pseudo_reference_points
             )
