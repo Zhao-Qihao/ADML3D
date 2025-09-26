@@ -58,7 +58,6 @@ def project_to_image(points, lidar2cam, cam2img):
 def draw_projected_3d_bboxes(ax, bboxes, lidar2cam, cam2img, img_shape):
     """
     Projects 3D bounding boxes to 2D and draws them on the given axis.
-    使用MMDetection3D的标准方法获取角点
     """
     from mmdet3d.structures.bbox_3d import LiDARInstance3DBoxes
     
