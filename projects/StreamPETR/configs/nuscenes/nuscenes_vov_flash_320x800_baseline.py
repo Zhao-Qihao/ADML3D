@@ -41,6 +41,10 @@ class_names = [
     "traffic_cone",
     "barrier",
 ]
+# class_names = [
+#     'car', 'truck', 'construction_vehicle', 'bus', 'trailer', 'barrier',
+#     'motorcycle', 'bicycle', 'pedestrian', 'traffic_cone'
+# ]  # Officially StreamPETR defined order
 metainfo = dict(classes=class_names)
 
 num_gpus = 4
@@ -412,7 +416,7 @@ env_cfg = dict(
     dist_cfg=dict(backend="nccl", timeout=3600),
 )  # Since we are doing inference with batch_size=1, it can be slow so timeout needs to be increased
 
-# load_from = "./work_dirs/fcos3d_vovnet_imgbackbone-remapped.pth"
+load_from = "./work_dirs/fcos3d_vovnet_imgbackbone-remapped.pth"
 
 work_dir = "./work_dirs/nuscenes_vov_flash_320x800_baseline"
-resume = True
+# resume = True

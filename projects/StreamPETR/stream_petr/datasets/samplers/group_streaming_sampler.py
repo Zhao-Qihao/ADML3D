@@ -76,7 +76,8 @@ class GroupStreamingSampler(Sampler):
                     [
                         x
                         for position, x in enumerate(group)
-                        if np.random.rand() > self.random_drop_probability and position > 0
+                        # if np.random.rand() > self.random_drop_probability and position > 0
+                        if position == 0 or np.random.rand() > self.random_drop_probability
                     ]
                 )
             indices = []
