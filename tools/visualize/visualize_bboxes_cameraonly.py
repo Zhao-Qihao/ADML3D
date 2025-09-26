@@ -58,8 +58,10 @@ def project_to_image(points, lidar2cam, cam2img):
 def draw_projected_3d_bboxes(ax, bboxes, lidar2cam, cam2img, img_shape):
     """
     Projects 3D bounding boxes to 2D and draws them on the given axis.
-    Clips the lines at image boundaries.
+    使用MMDetection3D的标准方法获取角点
     """
+    from mmdet3d.structures.bbox_3d import LiDARInstance3DBoxes
+    
     H, W = img_shape[:2]
 
     def clip_line(pt1, pt2, W, H):
@@ -75,53 +77,35 @@ def draw_projected_3d_bboxes(ax, bboxes, lidar2cam, cam2img, img_shape):
         if (x1 < 0 and x2 < 0) or (x1 >= W and x2 >= W) or (y1 < 0 and y2 < 0) or (y1 >= H and y2 >= H):
             return None
 
-        # You can implement Liang-Barsky or use simple clamping for one-side clip
+        # Simple clipping
         pt1_clipped = [np.clip(x1, 0, W - 1), np.clip(y1, 0, H - 1)]
         pt2_clipped = [np.clip(x2, 0, W - 1), np.clip(y2, 0, H - 1)]
         return [pt1_clipped, pt2_clipped]
 
-    for bbox in bboxes:
-        x, y, z, dx, dy, dz, yaw = bbox.cpu().numpy()[:7]
+    if len(bboxes) > 0:
+        lidar_boxes = LiDARInstance3DBoxes(bboxes[:, :7])  # only take the first 7 dimensions
+        breakpoint()
+        corners_3d = lidar_boxes.corners.cpu().numpy()  # shape: (N, 8, 3)
+        
+        for i, corners in enumerate(corners_3d):
+            # Project to image
+            projected, valid_mask = project_to_image(corners, lidar2cam, cam2img)
+            if not valid_mask.all():
+                continue
 
-        # Create 3D corners
-        corners = np.array(
-            [
-                [dx / 2, dy / 2, -dz / 2],
-                [dx / 2, -dy / 2, -dz / 2],
-                [-dx / 2, -dy / 2, -dz / 2],
-                [-dx / 2, dy / 2, -dz / 2],
-                [dx / 2, dy / 2, dz / 2],
-                [dx / 2, -dy / 2, dz / 2],
-                [-dx / 2, -dy / 2, dz / 2],
-                [-dx / 2, dy / 2, dz / 2],
+            # Define lines connecting the corners
+            lines = [
+                (0, 1), (1, 2), (2, 3), (3, 0),  # bottom face
+                (4, 5), (5, 6), (6, 7), (7, 4),  # top face  
+                (0, 4), (1, 5), (2, 6), (3, 7)   # vertical edges
             ]
-        )
 
-        # Apply rotation and translation
-        R = np.array(
-            [
-                [np.cos(yaw), -np.sin(yaw), 0],
-                [np.sin(yaw), np.cos(yaw), 0],
-                [0, 0, 1],
-            ]
-        )
-        rotated = corners @ R.T
-        translated = rotated + np.array([x, y, z])
-
-        # Project to image
-        projected, valid_mask = project_to_image(translated, lidar2cam, cam2img)
-        if not valid_mask.all():
-            continue
-
-        # Define lines
-        lines = [(0, 1), (1, 2), (2, 3), (3, 0), (4, 5), (5, 6), (6, 7), (7, 4), (0, 4), (1, 5), (2, 6), (3, 7)]
-
-        for i, j in lines:
-            pt1, pt2 = projected[i], projected[j]
-            clipped = clip_line(pt1, pt2, W, H)
-            if clipped:
-                ax.plot([clipped[0][0], clipped[1][0]], [clipped[0][1], clipped[1][1]], color="lime", linewidth=1)
-
+            for j, k in lines:
+                pt1, pt2 = projected[j], projected[k]
+                clipped = clip_line(pt1, pt2, W, H)
+                if clipped:
+                    ax.plot([clipped[0][0], clipped[1][0]], [clipped[0][1], clipped[1][1]], 
+                           color="lime", linewidth=1)
 
 def main():
     args = parse_args()
