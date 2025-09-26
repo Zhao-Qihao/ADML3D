@@ -83,7 +83,6 @@ def draw_projected_3d_bboxes(ax, bboxes, lidar2cam, cam2img, img_shape):
 
     if len(bboxes) > 0:
         lidar_boxes = LiDARInstance3DBoxes(bboxes[:, :7])  # only take the first 7 dimensions
-        breakpoint()
         corners_3d = lidar_boxes.corners.cpu().numpy()  # shape: (N, 8, 3)
         
         for i, corners in enumerate(corners_3d):
