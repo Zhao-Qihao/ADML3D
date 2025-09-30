@@ -17,8 +17,7 @@ Here are the new features of this repository compared to MMDetection3D.
   * Update to MMDetection3D v1.4.0 and torch 2.x
   * Export checkpoint to onnx format
 ## Custom Dataset Preparation
-Prepare the dataset following [prepare_data](https://mmdetection3d.readthedocs.io/zh-cn/latest/advanced_guides/customize_dataset.html)
-The directory should be organized as follows. Refer to [xbzl_data](https://github.com/Zhao-Qihao/xbzl_data).
+Prepare the dataset and the directory should be organized as follows. Refer to [xbzl_data](https://github.com/Zhao-Qihao/xbzl_data).
 ```
 mmdetection3d
 ├── mmdet3d
