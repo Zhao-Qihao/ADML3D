@@ -64,7 +64,7 @@ train_pipeline = [
         color_type='color',
         backend_args=backend_args),
     dict(
-        type='LoadPointsFromFile',
+        type='CustomLoadPointsFromPCDFile',
         coord_type='LIDAR',
         load_dim=_base_.point_load_dim,
         use_dim=_base_.point_use_dim,
@@ -136,7 +136,7 @@ test_pipeline = [
         color_type='color',
         backend_args=backend_args),
     dict(
-        type='LoadPointsFromFile',
+        type='CustomLoadPointsFromPCDFile',
         coord_type='LIDAR',
         load_dim=_base_.point_load_dim,
         use_dim=_base_.point_use_dim,

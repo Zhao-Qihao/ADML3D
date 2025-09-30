@@ -147,7 +147,7 @@ model = dict(
 
 train_pipeline = [
     dict(
-        type='LoadPointsFromFile',
+        type='CustomLoadPointsFromPCDFile',
         coord_type='LIDAR',
         load_dim=point_load_dim,
         use_dim=point_use_dim,
@@ -195,7 +195,7 @@ train_pipeline = [
 
 test_pipeline = [
     dict(
-        type='LoadPointsFromFile',
+        type='CustomLoadPointsFromPCDFile',
         coord_type='LIDAR',
         load_dim=point_load_dim,
         use_dim=point_use_dim,

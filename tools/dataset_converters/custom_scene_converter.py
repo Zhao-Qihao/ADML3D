@@ -51,7 +51,7 @@ def _fill_trainval_infos(root_path):
             continue  # 跳过非训练/验证集的文件夹
 
         scene_dir = osp.join(root_path, scene)
-        point_cloud_dir = osp.join(scene_dir, "lidar_point_cloud_1")
+        point_cloud_dir = osp.join(scene_dir, "lidar_point_cloud_0")
         label_dir = osp.join(scene_dir, "labels")
         camera_config_dir = osp.join(scene_dir, "camera_config")
 
@@ -64,7 +64,7 @@ def _fill_trainval_infos(root_path):
 
         for file in points_files:
             file_name = os.path.splitext(file)[0]
-            lidar_path = osp.join(point_cloud_dir, file_name + ".bin")
+            lidar_path = osp.join(point_cloud_dir, file_name + ".pcd")
             print(f"processing {lidar_path}")
             label_path = osp.join(label_dir, file_name + ".txt")
             calib_file_path = osp.join(camera_config_dir, file_name + ".json")
