@@ -11,6 +11,8 @@ from mmengine.config import Config
 from mmengine.device import get_device
 from mmengine.registry import init_default_scope
 from mmengine.runner import Runner, autocast, load_checkpoint
+import cv2, glob, os
+from tqdm import tqdm
 
 OBJECT_PALETTE = {
     "car": (255, 158, 0),
@@ -90,14 +92,37 @@ def visualize_lidar(
     )
     plt.close()
 
+def frames2video(fpaths,
+                 video_path: str = None,
+                 fps: int = 10,
+                 fourcc: str = "mp4v") -> str:
+    if video_path is None:
+        video_path = os.path.join(os.path.dirname(os.path.dirname(fpaths[0])),
+                                os.path.basename(os.path.dirname(fpaths[0])) + ".mp4")
+
+    if not fpaths:
+        raise ValueError("No frame paths provided")
+
+    h, w, _ = cv2.imread(fpaths[0]).shape
+    writer = cv2.VideoWriter(video_path,
+                           cv2.VideoWriter_fourcc(*fourcc),
+                           fps, (w, h))
+
+    for fn in tqdm(fpaths, desc="encoding video"):
+        writer.write(cv2.imread(fn))
+        os.remove(fn)
+    writer.release()
+    print(f"Saved video to: {video_path}")
+    return video_path
 
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("config", metavar="FILE")
     parser.add_argument("--checkpoint", type=str, default=None)
     parser.add_argument("--split", type=str, default="val", choices=["train", "val"])
-    parser.add_argument("--bbox-score", type=float, default=0.1)
+    parser.add_argument("--bbox-score", type=float, default=0.01)
     parser.add_argument("--out-dir", type=str, default="work_dirs/visualization")
+    parser.add_argument("--step", type=int, default=40, help="Number of steps to visualize (-1 for full)")
     args = parser.parse_args()
     return args
 
@@ -113,6 +138,7 @@ def main():
 
     # build dataset
     dataset = Runner.build_dataloader(cfg.test_dataloader)
+    steps = args.step if args.step != -1 else len(dataset)
 
     # build model and load checkpoint
     model = MODELS.build(cfg.model)
@@ -120,7 +146,11 @@ def main():
     model.to(get_device())
     model.eval()
 
-    for i, data in enumerate(dataset):
+    pbar = tqdm(range(steps))
+    data_iter = iter(dataset)
+    fpaths = []
+    for _ in pbar:
+        data = next(data_iter)  # each iteration yields one batch
         lidar_path = data["data_samples"][0].lidar_path.split("/")
         file_name = "_".join(lidar_path[3:8])
 
@@ -148,7 +178,8 @@ def main():
             ylim=[-60, 60],
             classes=cfg.class_names,
         )
-        break  # NOTE(Itachi): only visualize the first frame
+        fpaths.append(fpath)
+    frames2video(fpaths, fps=2)
 
 
 if __name__ == "__main__":
