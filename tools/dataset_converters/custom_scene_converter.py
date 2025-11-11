@@ -5,8 +5,10 @@ import numpy as np
 import json
 import yaml  # 用于读取 YAML 文件
 
-class_names = ['car', 'truck', 'bus', 'bicycle', 'pedestrian', 'traffic_cone', 'barrier']
-class_order = [0, 1, 2, 3, 4, 5, 6]
+# class_names = ['car', 'truck', 'bus', 'bicycle', 'pedestrian', 'traffic_cone', 'barrier']
+# class_order = [0, 1, 2, 3, 4, 5, 6]
+class_names = ['car', 'truck', 'bus', 'bicycle', 'pedestrian']
+class_order = [0, 1, 2, 3, 4]
 categories = dict(zip(class_names, class_order))
 
 def create_custom_dataset_infos(root_path, info_prefix):
@@ -61,6 +63,8 @@ def _fill_trainval_infos(root_path):
 
         # 获取所有点云文件名
         points_files = os.listdir(point_cloud_dir)
+        # 按文件名中的数字排序，以确保按时间顺序处理
+        points_files.sort(key=lambda x: int(os.path.splitext(x)[0]))
 
         for file in points_files:
             file_name = os.path.splitext(file)[0]
@@ -95,10 +99,10 @@ def _fill_trainval_infos(root_path):
             }
 
             # 处理图像信息
-            cameras = ['0', '1', '2', '3']
+            cameras = ['0', '1', '2', '3', '4']
             for cam_name in cameras:
                 cam_key = f"CAM_{cam_name}"
-                img_path = osp.join(scene_dir, f"camera_image_{cam_name}", file_name + ".jpg")
+                img_path = osp.join(scene_dir, f"camera_image_{cam_name}", file_name + ".png")
                 mmengine.check_file_exist(img_path)
 
                 # 读取相机参数
@@ -150,7 +154,7 @@ def _fill_trainval_infos(root_path):
             # 将样本添加到对应的集合中
             if scene in train_scenes:
                 train_infos.append(info)
-            elif scene in val_scenes:
+            if scene in val_scenes:
                 val_infos.append(info)
     print(num_frames)
 

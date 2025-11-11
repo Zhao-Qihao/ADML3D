@@ -36,7 +36,7 @@ mmdetection3d
 ```python
 python tools/create_data.py custom --root-path ./data/custom --out-dir ./data/custom --extra-tag custom
 ```
-notice that there are 7class in my custom dataset, ['car','truck','bus','bicycle','pedestrian','traffic_cone','barrier'], you can change the class name in [custom_scene_converter.py](./tools/dataset_converters/custom_scene_converter.py#L8-L9) and [custom_dataset.py](./projects/BEVFusion/datasets/custom_dataset.py#L42-L45) to fit your dataset.
+notice that there are 7class in my custom dataset, ['car','truck','bus','bicycle','pedestrian'], you can change the class name in [custom_scene_converter.py](./tools/dataset_converters/custom_scene_converter.py#L8-L9) and [custom_dataset.py](./projects/BEVFusion/datasets/custom_dataset.py#L42-L45) to fit your dataset.
 
 
 

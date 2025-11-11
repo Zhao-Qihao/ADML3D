@@ -40,8 +40,8 @@ class CustomDataset(Det3DDataset):
     """
 
     METAINFO = {
-        'classes': ('car','truck','bus','bicycle','pedestrian','traffic_cone','barrier'),
-        'palette': [(106, 0, 228), (119, 11, 32), (165, 42, 42),(180, 135, 0), (0, 60, 100), (0, 0, 142), (0, 0, 70)]
+        'classes': ('car','truck','bus','bicycle','pedestrian'),
+        'palette': [(106, 0, 228), (119, 11, 32), (165, 42, 42),(180, 135, 0), (0, 60, 100)]
     }
 
     def __init__(self,

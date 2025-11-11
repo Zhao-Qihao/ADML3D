@@ -171,6 +171,8 @@ test_pipeline = [
 ]
 
 train_dataloader = dict(
+    batch_size=2,
+    num_workers=8,
     dataset=dict(
         dataset=dict(pipeline=train_pipeline, modality=input_modality)))
 val_dataloader = dict(
@@ -212,7 +214,7 @@ param_scheduler = [
 ]
 
 # runtime settings
-train_cfg = dict(by_epoch=True, max_epochs=20, val_interval=5)
+train_cfg = dict(by_epoch=True, max_epochs=6, val_interval=6)
 val_cfg = dict()
 test_cfg = dict()
 
@@ -229,8 +231,8 @@ auto_scale_lr = dict(enable=False, base_batch_size=32)
 
 default_hooks = dict(
     logger=dict(type='LoggerHook', interval=50),
-    checkpoint=dict(type='CheckpointHook', interval=5))
+    checkpoint=dict(type='CheckpointHook', interval=6))
 del _base_.custom_hooks
-work_dir = './work_dirs/lidar_custom'
-# load_from = '/home/zqh/project/mmdetection3d/work_dirs/lidar_custom/epoch_20.pth'
-load_from = '/home/zqh/project/autoware-ml/work_dirs/nus_lidar_cam_4dim_load_from_lyft_epoch_2_7class_nodepth_loss/epoch_3.pth'
+work_dir = './work_dirs/lidar-cam_custom_1110'
+load_from = '/home/zqh/project/mmdetection3d/work_dirs/lidar_custom_1110/epoch_20.pth'
+# load_from = '/home/zqh/project/autoware-ml/work_dirs/nus_lidar_cam_4dim_load_from_lyft_epoch_2_7class_nodepth_loss/epoch_3.pth'

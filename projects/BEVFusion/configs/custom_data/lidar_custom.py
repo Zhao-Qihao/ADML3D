@@ -11,12 +11,12 @@ custom_imports = dict(
 # keys in the config.
 voxel_size = [0.075, 0.075, 0.2]
 point_cloud_range = [-54.0, -54.0, -5.0, 54.0, 54.0, 3.0]
-class_names = [
-    'car', 'truck', 'bus', 'bicycle', 'pedestrian', 'traffic_cone', 'barrier'
-]
 # class_names = [
-#     'car', 'truck', 'bus', 'bicycle', 'pedestrian'
+#     'car', 'truck', 'bus', 'bicycle', 'pedestrian', 'traffic_cone', 'barrier'
 # ]
+class_names = [
+    'car', 'truck', 'bus', 'bicycle', 'pedestrian'
+]
 num_classes = len(class_names)
 point_load_dim = 3  # NOTE(Itachi): change to your point cloud feat dimension
 point_use_dim = [0, 1, 2]  # NOTE(Itachi): change to your point cloud use dimension
@@ -30,6 +30,7 @@ data_prefix = dict(pts='',
                    CAM_1='', 
                    CAM_2='',
                    CAM_3='',
+                   CAM_4='',
                    sweeps='')
 input_modality = dict(use_lidar=True, use_camera=False)
 backend_args = None
@@ -222,8 +223,8 @@ test_pipeline = [
 ]
 
 train_dataloader = dict(
-    batch_size=3,
-    num_workers=4,
+    batch_size=6,
+    num_workers=24,
     persistent_workers=True,
     sampler=dict(type='DefaultSampler', shuffle=True),
     dataset=dict(
@@ -268,7 +269,10 @@ val_evaluator = dict(
     backend_args=backend_args)
 test_evaluator = val_evaluator
 
-vis_backends = [dict(type='LocalVisBackend')]
+vis_backends = [
+    dict(type="LocalVisBackend"),
+    dict(type="TensorboardVisBackend"),
+]
 visualizer = dict(
     type='Det3DLocalVisualizer', vis_backends=vis_backends, name='visualizer')
 
@@ -335,6 +339,7 @@ log_processor = dict(window_size=50)
 
 default_hooks = dict(
     logger=dict(type='LoggerHook', interval=10),
-    checkpoint=dict(type='CheckpointHook', interval=20))
+    checkpoint=dict(type='CheckpointHook', interval=10))
 custom_hooks = [dict(type='DisableObjectSampleHook', disable_after_epoch=15)]
 load_from  = '/home/zqh/project/autoware-ml/work_dirs/mmdet3d_official/bevfusion_lidar_voxel0075_second_secfpn_8xb4-cyclic-20e_nus-3d-2628f933.pth'
+work_dir = '/home/zqh/project/mmdetection3d/work_dirs/lidar_custom_1110'
