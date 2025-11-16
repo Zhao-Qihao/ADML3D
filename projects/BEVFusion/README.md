@@ -13,13 +13,6 @@ python projects/BEVFusion/setup.py develop
 pip install spconv-cu120
 ```
 
-### Demo
-
-Run a demo on NuScenes data using [BEVFusion model](https://drive.google.com/file/d/1QkvbYDk4G2d6SZoeJqish13qSyXA4lp3/view?usp=share_link):
-
-```shell
-python tools/visualize/visualize_bev.py /home/zqh/project/mmdetection3d/projects/BEVFusion/configs/nuscenes/bevfusion_lidar-cam_voxel0075_second_secfpn_8xb4-cyclic-20e_nus-3d.py --checkpoint ${CHECKPOINT_FILE} 
-```
 
 ### Training commands
 We support two dataset type, nuscenes dataset and custom dataset.
@@ -45,6 +38,14 @@ In MMDetection3D's root directory, run the following command to test the model:
 
 ```bash
 bash tools/dist_test.sh projects/BEVFusion/configs/nuscenes/bevfusion_lidar-cam_voxel0075_second_secfpn_8xb4-cyclic-20e_nus-3d.py ${CHECKPOINT_PATH} 8
+```
+
+### Visualization
+
+Run inference and visualize bounding boxes:
+
+```shell
+python tools/visualize/visualize_bev.py /home/zqh/project/mmdetection3d/projects/BEVFusion/configs/nuscenes/bevfusion_lidar-cam_voxel0075_second_secfpn_8xb4-cyclic-20e_nus-3d.py --checkpoint ${CHECKPOINT_FILE} 
 ```
 
 ### Deployment
